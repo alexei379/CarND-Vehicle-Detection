@@ -1,12 +1,12 @@
 class Classifier:
-    RECALCULATE = False
+    RECALCULATE = True
     COLOR_SPACE = 'YCrCb'
-    ORIENT = 9
+    ORIENT = 8
     PIX_PER_CELL = 8
     CELL_PER_BLOCK = 2
     HOG_CHANNEL = 'ALL'
-    SPATIAL_SIZE = (32, 32)
-    HIST_BINS = 32
+    SPATIAL_SIZE = (16, 16)
+    HIST_BINS = 64
     SPATIAL_F = True
     HIST_F = True
     HOG_F = True

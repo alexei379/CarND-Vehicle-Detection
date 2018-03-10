@@ -13,22 +13,11 @@ def get_hog_features(img, orient, pix_per_cell, cell_per_block,
 
 
 # Define a function to compute binned color features
-# https://classroom.udacity.com/nanodegrees/nd013/parts/fbf77062-5703-404e-b60c-95b78b2f3f9e/modules/2b62a1c3-e151-4a0e-b6b6-e424fa46ceab/lessons/05b03f20-8c4b-453c-b41e-9fac590278c7/concepts/cacf86d7-f8eb-46bd-9f09-34a2ff208ce8
 def bin_spatial(img, size=(32, 32)):
     # Use cv2.resize().ravel() to create the feature vector
     features = cv2.resize(img, size).ravel()
     # Return the feature vector
     return features
-
-
-# Define a function to compute binned color features
-# Q&A
-def bin_spatial_bak(img, size=(32, 32)):
-    # Use cv2.resize().ravel() to create the feature vector
-    color1 = cv2.resize(img[:, :, 0], size).ravel()
-    color2 = cv2.resize(img[:, :, 1], size).ravel()
-    color3 = cv2.resize(img[:, :, 2], size).ravel()
-    return np.hstack((color1, color2, color3))
 
 
 # Define a function to compute color histogram features
@@ -107,7 +96,7 @@ def extract_features(imgs, cspace='RGB', spatial_size=(32, 32), hist_bins=32,
     for file in imgs:
         # Read in each one by one
         image = visualization.load_image(file)
-        image_features = single_image_features(image, cspace=cspace, spatial_size=spatial_size, hist_bins=hist_bins,
+        image_features = single_image_features(image, color_space=cspace, spatial_size=spatial_size, hist_bins=hist_bins,
                                                orient=orient, pix_per_cell=pix_per_cell, cell_per_block=cell_per_block,
                                                hog_channel=hog_channel,
                                                spatial_f=spatial_f, hist_f=hist_f, hog_f=hog_f)
