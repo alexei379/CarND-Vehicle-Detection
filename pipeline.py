@@ -183,9 +183,9 @@ from moviepy.editor import VideoFileClip
 input_video_file = "project_video.mp4"
 output_video = "output_video/" + input_video_file
 
-heatmap_obj = HeatmapContainer(over_frames=1, threshold=0)
+heatmap_obj = HeatmapContainer(over_frames=10, threshold=30)
 
-clip = VideoFileClip(input_video_file).subclip('00:00:24.50', '00:00:24.75')# .subclip('00:00:24.50', '00:00:26.00')#.subclip('00:00:18.00', '00:00:20.00')
+clip = VideoFileClip(input_video_file)#.subclip('00:00:21.00', '00:00:25.00')# .subclip('00:00:24.50', '00:00:26.00')#.subclip('00:00:18.00', '00:00:20.00')
 out_clip = clip.fl_image(lambda img: process_heat_image(img, heatmap_obj))
 out_clip.write_videofile(output_video, audio=False)
 

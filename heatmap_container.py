@@ -19,6 +19,15 @@ class HeatmapContainer:
 
 
     def add_to_heatmap(self, bbox_list_to_add, confidence):
+        new_heatmap = np.zeros(shape=self.shape).astype(int)
+        for box in bbox_list_to_add:
+            # Assuming each "box" takes the form ((x1, y1), (x2, y2))
+            new_heatmap[box[0][1]:box[1][1], box[0][0]:box[1][0]] += 1
+        self.heatmap_queue.append(new_heatmap)
+        self.heatmap = sum(self.heatmap_queue)
+
+
+        '''
         if len(self.heatmap_queue) < self.over_frames:
             self.heatmap_queue.append(bbox_list_to_add)
             self.confidence_queue.append(confidence)
@@ -30,6 +39,8 @@ class HeatmapContainer:
             self.heatmap_queue.append(bbox_list_to_add)
             self.confidence_queue.append(confidence)
             self.add_bb_list(bbox_list_to_add, confidence, coeff=1)
+            
+        '''
         '''
         if self.heatmap_queue is not None:
             bbox_list_to_remove = self.heatmap_queue.popleft()
