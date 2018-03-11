@@ -122,15 +122,14 @@ hog_f = config.Classifier.HOG_F
 
 scales = [
     # (scale, ystart, ystop, xstart, xstop)
-    # (0.5, 388, 450, 564, 1076),
-    (1, 400, 496, 504, 1272),
-    (1.25, 368, 528, 512, 1280),
-    (1.5, 368, 560, 512, 1280),
-    (2, 368, 624, 512, 1280),
+    (0.5, 412, 466, 620, 1020),
+    (1, 400, 496, 600, 1272),
+    (1.25, 368, 528, 600, 1280),
+    (1.5, 368, 560, 600, 1280),
+    (2, 368, 624, 600, 1280),
 ]
 
 def simple_process_image(img):
-    t1 = time.time()
 
     windows = image_features.slide_window(img, x_start_stop=[None, None], y_start_stop=y_start_stop,
                                           xy_window=(64, 64), xy_overlap=(overlap, overlap))
@@ -140,7 +139,6 @@ def simple_process_image(img):
                                             cell_per_block=cell_per_block,
                                             hog_channel=hog_channel, spatial_feat=spatial_f,
                                             hist_feat=hist_f, hog_feat=hog_f)
-    # print(time.time() - t1, 'Seconds to process image searching', len(windows), 'windows')
 
     return visualization.draw_boxes(img, hot_windows, color=(0, 0, 255), thick=3)
 
@@ -177,7 +175,6 @@ for img_src in glob.glob(config.Pipeline.IMG_INPUT):
     visualization.save_image(window_img, config.Pipeline.IMG_OUTPUT_DIR + img_src)
 '''
 
-
 from moviepy.editor import VideoFileClip
 
 input_video_file = "project_video.mp4"
@@ -185,10 +182,12 @@ output_video = "output_video/" + input_video_file
 
 heatmap_obj = HeatmapContainer(over_frames=10, threshold=30)
 
-clip = VideoFileClip(input_video_file)#.subclip('00:00:21.00', '00:00:25.00')# .subclip('00:00:24.50', '00:00:26.00')#.subclip('00:00:18.00', '00:00:20.00')
+clip = VideoFileClip(input_video_file).subclip('00:00:23.50', '00:00:26.00')
+    #.subclip('00:00:05.00', '00:00:07.00')
+    #.subclip('00:00:18.00', '00:00:20.00')
+
 out_clip = clip.fl_image(lambda img: process_heat_image(img, heatmap_obj))
 out_clip.write_videofile(output_video, audio=False)
-
 
 
 '''

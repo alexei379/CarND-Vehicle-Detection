@@ -51,6 +51,7 @@ def search_windows(img, windows, clf, scaler, color_space='RGB',
 
 # Define a single function that can extract features using hog sub-sampling and make predictions
 def find_cars(img, ystart, ystop, xstart, xstop, scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins, vis=False, min_confidence=0.2):
+
     on_windows = []
     on_confidence = []
 

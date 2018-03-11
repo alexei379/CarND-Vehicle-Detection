@@ -64,7 +64,7 @@ class HeatmapContainer:
             self.heatmap[box[0][1]:box[1][1], box[0][0]:box[1][0]] += coeff
             self.confidence_heatmap[box[0][1]:box[1][1], box[0][0]:box[1][0]] += coeff * confidence[idx]
 
-    def draw_labeled_bboxes(self, img, color=(0, 0, 255), thickness=4):
+    def draw_labeled_bboxes(self, img, color=(0, 0, 255), thickness=2):
         self.frame_counter += 1
         # Iterate through all detected cars
         for car_number in range(1, self.labels[1] + 1):
@@ -75,7 +75,7 @@ class HeatmapContainer:
             nonzerox = np.array(nonzero[1])
             # Define a bounding box based on min/max x and y
             bbox = ((np.min(nonzerox), np.min(nonzeroy)), (np.max(nonzerox), np.max(nonzeroy)))
-            if abs(bbox[0][0] - bbox[1][0]) * abs(bbox[0][1] - bbox[1][1]) >= 1500:
+            if abs(bbox[0][0] - bbox[1][0]) * abs(bbox[0][1] - bbox[1][1]) >= 512:
                 # Draw the box on the image
                 cv2.rectangle(img, bbox[0], bbox[1], color=color, thickness=thickness)
 
@@ -84,8 +84,8 @@ class HeatmapContainer:
                 cv2.putText(img, str(sub_heatmap.min()) + '-'+str(sub_heatmap.max()), bbox[0], cv2.FONT_HERSHEY_DUPLEX, 0.75, 255)
 
                 # add confidence avg
-                sub_confidence = self.confidence_heatmap[bbox[0][1]:bbox[1][1], bbox[0][0]:bbox[1][0]]
-                cv2.putText(img, str(sub_confidence.mean()), (bbox[0][0], bbox[1][1] + 25), cv2.FONT_HERSHEY_DUPLEX, 0.75, 255)
+                # sub_confidence = self.confidence_heatmap[bbox[0][1]:bbox[1][1], bbox[0][0]:bbox[1][0]]
+                # cv2.putText(img, str(sub_confidence.mean()), (bbox[0][0], bbox[1][1] + 25), cv2.FONT_HERSHEY_DUPLEX, 0.75, 255)
         # Return the image
         return img
 
@@ -96,7 +96,7 @@ class HeatmapContainer:
         else:
             hm = self.heatmap
 
-        boost = 16
+        boost = 3
         return np.dstack((np.clip(hm * boost, 0, 255),  # R
                                      np.zeros_like(hm),  # G
                                      np.zeros_like(hm))).astype(np.uint8)  # B
