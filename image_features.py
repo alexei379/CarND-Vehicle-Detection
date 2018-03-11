@@ -32,14 +32,7 @@ def color_hist(img, nbins=32, bins_range=(0, 256)):
     return hist_features
 
 
-def single_image_features(image, color_space='RGB', spatial_size=(32, 32), hist_bins=32,
-                          orient=9, pix_per_cell=8, cell_per_block=2, hog_channel=0,
-                          spatial_f=True, hist_f=True, hog_f=True, vis=False):
-    # vector to collect features
-    features = []
-    hog_image = None
-
-    # apply color conversion if other than 'RGB'
+def convert_to_color_space(image, color_space='RGB'):
     if color_space != 'RGB':
         if color_space == 'HSV':
             feature_image = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
@@ -53,6 +46,18 @@ def single_image_features(image, color_space='RGB', spatial_size=(32, 32), hist_
             feature_image = cv2.cvtColor(image, cv2.COLOR_RGB2YCrCb)
     else:
         feature_image = np.copy(image)
+    return feature_image
+
+def single_image_features(image, color_space='RGB', spatial_size=(32, 32), hist_bins=32,
+                          orient=9, pix_per_cell=8, cell_per_block=2, hog_channel=0,
+                          spatial_f=True, hist_f=True, hog_f=True, vis=False):
+    # vector to collect features
+    features = []
+    hog_image = None
+
+    # apply color conversion if other than 'RGB'
+    feature_image = convert_to_color_space(image, color_space)
+
     if spatial_f:
         spatial_features = bin_spatial(image, spatial_size)
         features.append(spatial_features)

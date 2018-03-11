@@ -16,10 +16,19 @@ from sklearn.svm import LinearSVC
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 
+from heatmap_container import HeatmapContainer
+
+
 # ds = datasets.DefaultDatasetLoader(config.Pipeline.DEBUG)
 
 # save some test images
 
+'''
+heatmap = HeatmapContainer(shape=(10, 20))
+heatmap.add_heatmap([((0,0),(10,20))])
+heatmap.add_heatmap([((0,0),(5,5))])
+heatmap.render_heatmap(clip_threshold=False)
+'''
 
 '''
 trn = trainer.Trainer()
@@ -86,13 +95,13 @@ trn.extract_training_data()
 trn.train(cls=cls)
 '''
 
-
+'''
 cls = LinearSVC()
 trn = trainer.Trainer()
 trn.extract_training_data()
 trn.train(cls=cls)
 
-
+'''
 
 X_scaler = classifier.load(config.Classifier.SCALER_FILE)
 svc = classifier.load(config.Classifier.CLS_FILE)
@@ -111,6 +120,14 @@ spatial_f = config.Classifier.SPATIAL_F
 hist_f = config.Classifier.HIST_F
 hog_f = config.Classifier.HOG_F
 
+scales = [
+    # (scale, ystart, ystop, xstart, xstop)
+    # (0.5, 388, 450, 564, 1076),
+    (1, 400, 496, 504, 1272),
+    (1.25, 368, 528, 512, 1280),
+    (1.5, 368, 560, 512, 1280),
+    (2, 368, 624, 512, 1280),
+]
 
 def simple_process_image(img):
     t1 = time.time()
@@ -125,40 +142,33 @@ def simple_process_image(img):
                                             hist_feat=hist_f, hog_feat=hog_f)
     # print(time.time() - t1, 'Seconds to process image searching', len(windows), 'windows')
 
-    return visualization.draw_boxes(img, hot_windows, color=(0, 0, 255), thick=6)
+    return visualization.draw_boxes(img, hot_windows, color=(0, 0, 255), thick=3)
 
-def process_heat_image(img):
-    ystart = 400
-    ystop = 656
+def process_heat_image(img, heatmap_history, render_heatmap=True, save_matches=False):
+    windows = []
+    confidence = []
 
-    xstart = 416
-    xstop = 1280
+    for s in scales:
+        scale, ystart, ystop, xstart, xstop = s
+        windows_s, confidence_s = classifier.find_cars(img, ystart, ystop, xstart, xstop, scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins, min_confidence=0.1)
+        windows.extend(windows_s)
+        confidence.extend(confidence_s)
 
-    scale = 1
+    if save_matches:
+        for idx, bbox in enumerate(windows):
+            matched_subimage = img[bbox[0][1]:bbox[1][1], bbox[0][0]:bbox[1][0]]
+            visualization.save_image(matched_subimage, config.Pipeline.IMG_OUTPUT_DIR + 'matches_debug/' + str(heatmap_history.frame_counter).zfill(5)  + '_' + str(idx) + '.jpg')
 
-    t1 = time.time()
-    windows = classifier.find_cars(img, ystart, ystop, xstart, xstop, scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins)
-    heat_image = np.zeros_like(img[:, :, 0]).astype(np.float)
 
-    # out_img = visualization.draw_boxes(img, windows_1, (255, 0, 0), 4)
+    heatmap_history.add_to_heatmap(windows, confidence)
+    heatmap_history.draw_labeled_bboxes(img)
 
-    # Add heat to each box in box list
-    heat = image_features.add_heat(heat_image, windows)
+    if render_heatmap:
+        hm = heatmap_history.render_heatmap(thresholded=True)
+        hm = cv2.resize(hm, (0, 0), fx=0.25, fy=0.25)
+        img[0:hm.shape[0], img.shape[1]-hm.shape[1]:img.shape[1]] = hm
 
-    # Apply threshold to help remove false positives
-    heat = image_features.apply_heat_threshold(heat, 1)
-
-    # Visualize the heatmap when displaying
-    heatmap = np.clip(heat, 0, 255)
-
-    # Find final boxes from heatmap using label function
-    labels = label(heatmap)
-    out_img = visualization.draw_labeled_bboxes(np.copy(img), labels)
-
-    # print(time.time() - t1, 'Seconds to process image')
-    return out_img
-    # visualization.save_image(out_img, config.Pipeline.IMG_OUTPUT_DIR + img_src)
-    # visualization.save_image(heatmap, config.Pipeline.IMG_OUTPUT_DIR + img_src + '_heat.jpg')
+    return img
 
 '''
 for img_src in glob.glob(config.Pipeline.IMG_INPUT):
@@ -167,17 +177,19 @@ for img_src in glob.glob(config.Pipeline.IMG_INPUT):
     visualization.save_image(window_img, config.Pipeline.IMG_OUTPUT_DIR + img_src)
 '''
 
-'''
+
 from moviepy.editor import VideoFileClip
 
 input_video_file = "project_video.mp4"
 output_video = "output_video/" + input_video_file
-clip = VideoFileClip(input_video_file)
-out_clip = clip.fl_image(process_heat_image)
-out_clip.write_videofile(output_video)
+
+heatmap_obj = HeatmapContainer(over_frames=1, threshold=0)
+
+clip = VideoFileClip(input_video_file).subclip('00:00:24.50', '00:00:24.75')# .subclip('00:00:24.50', '00:00:26.00')#.subclip('00:00:18.00', '00:00:20.00')
+out_clip = clip.fl_image(lambda img: process_heat_image(img, heatmap_obj))
+out_clip.write_videofile(output_video, audio=False)
 
 
-'''
 
 '''
 for img_src in glob.glob(config.Pipeline.IMG_INPUT):
@@ -218,63 +230,36 @@ for img_src in glob.glob(config.Pipeline.IMG_INPUT):
 
 
 for img_src in glob.glob(config.Pipeline.IMG_INPUT):
-
+    hog_vis = True
     img = visualization.load_image(img_src)
     img_filename = os.path.basename(img_src)
 
-    t1 = time.time()
+    windows = []
+    print(img_filename)
+    for s in scales:
+        scale, ystart, ystop, xstart, xstop = s
+        px_scale = int(scale * 64)
+
+        all_boxes = image_features.slide_window(img, [xstart, xstop], [ystart, ystop], (px_scale, px_scale), (0.875, 0.875))
+
+        windows_s, confidence_s, hog_img = classifier.find_cars(img, ystart, ystop, xstart, xstop, scale, svc, X_scaler, orient, pix_per_cell,
+                                         cell_per_block, spatial_size, hist_bins, hog_vis)
+
+        print(px_scale, confidence_s)
+        hog_combined = np.copy(img)
+        hog_img = cv2.resize(hog_img, (0,0), fx=scale, fy=scale)
+        hog_combined[ystart:ystart+hog_img.shape[0], xstart:xstart + hog_img.shape[1]] = hog_img
 
 
-    ystart = 400
-    ystop = 464
+        out_img_s = visualization.draw_boxes(img, all_boxes, (255, 0, 0), 1)
+        out_img_s = visualization.draw_boxes(out_img_s, windows_s, (0, 255, 0), 1)
+        hog_combined = visualization.draw_boxes(hog_combined, windows_s, (0, 255, 0), 1)
 
-    xstart = 500
-    xstop = 948
+        visualization.save_image(hog_combined, config.Pipeline.IMG_OUTPUT_DIR + img_filename +'_' + str(px_scale) + '_hog.jpg')
+        visualization.save_image(out_img_s, config.Pipeline.IMG_OUTPUT_DIR + img_filename + '_' + str(px_scale) + '_boxes.jpg')
 
-    scale = 0.5
-
-    # windows_32 = image_features.slide_window(img=img, x_start_stop=[xstart, xstop], y_start_stop=[ystart, ystop], xy_window=(32, 32), xy_overlap=(0, 0))
-    windows_32 = classifier.find_cars(img, ystart, ystop, xstart, xstop, scale, svc, X_scaler, orient, pix_per_cell, cell_per_block,
-                                   spatial_size, hist_bins)
-    # out_img = visualization.draw_boxes(img, windows_32, (255, 0, 0), 3)
-    # visualization.save_image(out_img, config.Pipeline.IMG_OUTPUT_DIR + '32_' + img_filename)
+        windows.extend(windows_s)
 
 
-    ystart = 400
-    ystop = 528
-
-    xstart = 448
-    xstop = 1216
-
-    scale = 1
-
-    # windows_64 = image_features.slide_window(img=img, x_start_stop=[xstart, xstop], y_start_stop=[ystart, ystop], xy_window=(64, 64), xy_overlap=(0, 0))
-    windows_64 = classifier.find_cars(img, ystart, ystop, xstart, xstop, scale, svc, X_scaler, orient, pix_per_cell, cell_per_block,
-                                   spatial_size, hist_bins)
-    # out_img = visualization.draw_boxes(img, windows_64, (255, 0, 0), 3)
-    # visualization.save_image(out_img, config.Pipeline.IMG_OUTPUT_DIR + '64_' + img_filename)
-
-
-    ystart = 368
-    ystop = 656
-
-    xstart = 416
-    xstop = 1280
-
-    scale = 2
-
-    # windows_96 = image_features.slide_window(img=img, x_start_stop=[xstart, xstop], y_start_stop=[ystart, ystop], xy_window=(96, 96), xy_overlap=(0, 0))
-    windows_96 = classifier.find_cars(img, ystart, ystop, xstart, xstop, scale, svc, X_scaler, orient, pix_per_cell, cell_per_block,
-                                   spatial_size, hist_bins)
-    # out_img = visualization.draw_boxes(img, windows_96, (255, 0, 0), 3)
-    # visualization.save_image(out_img, config.Pipeline.IMG_OUTPUT_DIR + '96_' + img_filename)
-
-    print(time.time() - t1, 'Seconds to process image')
-
-
-    out_img = visualization.draw_boxes(img, windows_96, (0, 0, 255), 4)
-    out_img = visualization.draw_boxes(out_img, windows_64, (0, 255, 0), 2)
-    out_img = visualization.draw_boxes(out_img, windows_32, (255, 0, 0), 1)
-
-    visualization.save_image(out_img, config.Pipeline.IMG_OUTPUT_DIR + 'detected_' + img_filename)
-
+    out_img = visualization.draw_boxes(img, windows, (0, 255, 255), 1)
+    visualization.save_image(out_img, config.Pipeline.IMG_OUTPUT_DIR + img_filename + '_all_detected_boxes.jpg')

@@ -12,8 +12,8 @@ class Classifier:
     HOG_F = True
     TRAIN_ON_SUBSET = -1
 
-    CLS_FILE = 'cls.pkl'
-    SCALER_FILE = 'scaler.pkl'
+    CLS_FILE = 'cls_' + COLOR_SPACE + '.pkl'
+    SCALER_FILE = 'scaler_' + COLOR_SPACE + '.pkl'
 
 class Trainer:
     None
