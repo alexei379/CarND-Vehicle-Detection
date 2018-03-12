@@ -35,6 +35,7 @@ The goals / steps of this project are the following:
 [all_detected_boxes3]: ./output_images/test3.jpg_all_detected_boxes.jpg
 [all_detected_boxes6]: ./output_images/test6.jpg_all_detected_boxes.jpg
 
+[heatmap_demo]: ./output_images/heatmap_demo.jpg
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/513/view) Points
 ### Here I will consider the rubric points individually and describe how I addressed each point in my implementation.  
@@ -159,26 +160,22 @@ Ultimately I searched on 5 scales using YCrCb 3-channel HOG features plus spatia
 ### Video Implementation
 
 #### 1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (somewhat wobbly or unstable bounding boxes are ok as long as you are identifying the vehicles most of the time with minimal false positives.)
-Here's a [link to my video result](./project_video.mp4)
+https://www.youtube.com/watch?v=cHjV4XDjD1A
 
+[![](https://img.youtube.com/vi/cHjV4XDjD1A/0.jpg)](https://www.youtube.com/watch?v=cHjV4XDjD1A)
 
 #### 2. Describe how (and identify where in your code) you implemented some kind of filter for false positives and some method for combining overlapping bounding boxes.
 
-I recorded the positions of positive detections in each frame of the video.  From the positive detections I created a heatmap and then thresholded that map to identify vehicle positions.  I then used `scipy.ndimage.measurements.label()` to identify individual blobs in the heatmap.  I then assumed each blob corresponded to a vehicle.  I constructed bounding boxes to cover the area of each blob detected.  
+Video pipeline is implemented in `pipeline.py`. It gets positive detections using `find_cars` in `classifier.py` at various window scales, adds the windows to heatmap, get identified windows back from heatmap and renders result over the frame. I also addded heatmap visualisation in the top right corner of the video.
 
-Here's an example result showing the heatmap from a series of frames of video, the result of `scipy.ndimage.measurements.label()` and the bounding boxes then overlaid on the last frame of video:
+The heatmap is implementted in `heatmap_container.py` file and is used to combine multiple detections across several frames and elliminate false positives using threashold calculated over several frames.
 
-### Here are six frames and their corresponding heatmaps:
+I recorded the positions of positive detections in each frame of the video in `add_to_heatmap` function. I applied "boost" to the detected boxes if they are within proximity of previously detected blobs or are appearing from the side (not the middle) if detection region. I keep track if last 12 frame's heatmaps using `dequeue` structure. I summed up all heamaps and then thresholded that map to identify vehicle positions. "Boosting" and thresholding the result over several frames to elliminate false positives worked quite well for the project video.
 
-![alt text][image5]
+I then used `scipy.ndimage.measurements.label()` to identify individual blobs in the heatmap. I then assumed each blob corresponded to a vehicle.  I constructed bounding boxes to cover the area of each blob detected and drawed them in `draw_labeled_bboxes`.
 
-### Here is the output of `scipy.ndimage.measurements.label()` on the integrated heatmap from all six frames:
-![alt text][image6]
-
-### Here the resulting bounding boxes are drawn onto the last frame in the series:
-![alt text][image7]
-
-
+I rendered the resulting labels and heatmap to the output video and they demostrate both steps well. Example video frame:
+![heatmap_demo]
 
 ---
 
