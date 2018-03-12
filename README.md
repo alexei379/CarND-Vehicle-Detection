@@ -129,6 +129,19 @@ I explored various options in `exploration.py` lines 94-126 and came up with the
 
 Actual classifier implemented in `find_cars` in `classifier.py` (see details below).
 
+Scales and areas of interest for the scale I used for the project are defined in `config.py` under `Pipeline` section:
+```python
+    SCALES = [
+        # (scale, ystart, ystop, xstart, xstop)
+        (0.5, 412, 466, 620, 1020),
+        (1, 400, 496, 600, 1272),
+        (1.25, 368, 528, 600, 1280),
+        (1.5, 368, 560, 600, 1280),
+        (2, 368, 624, 600, 1280),
+    ]
+```
+
+Here are sample grids and detections:
 | Size (Scale) | Sample grid with detections |
 | - | - |
 | 32x32 (0.5) | ![grid_32] |
