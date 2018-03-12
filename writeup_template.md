@@ -82,12 +82,30 @@ Using the same method I selected number of `bins=64` for color histogram and siz
 
 I tried various combinations of `[HOG, histogram, spatial]` features and classifier worked best with all 3 present.
 
-I stored the resulting parameters in `config.py` under `Classifier` section.
+Although during training `LUV` and  `YCrCb` colorspaces both performed well, I got better results in project video using `YCrCb` 
+
+I stored the resulting parameters in `config.py` under `Classifier` section:
+```python
+COLOR_SPACE = 'YCrCb'
+ORIENT = 8
+PIX_PER_CELL = 8
+CELL_PER_BLOCK = 2
+HOG_CHANNEL = 'ALL'
+SPATIAL_SIZE = (16, 16)
+HIST_BINS = 64
+SPATIAL_F = True
+HIST_F = True
+HOG_F = True
+```
 
 
 #### 3. Describe how (and identify where in your code) you trained a classifier using your selected HOG features (and color features if you used them).
 
-I trained a linear SVM using...
+I perform the classifier training in `train` function in `trainer.py`. I implemented `extract_training_data` to extract training data using HOG, color histogram and binning features. I scale data using `StandardScaler`. I perform training using `test_size=0.1` split.
+Trained classifier is pickeled for future use in pipeline.
+
+I was exploring LinearSVC vs. SVC tuned with GridSearchCV (`look_for_classifier_type` in `trainer.py`). Best options for SVC were `{'kernel': 'rbf', 'gamma': 0.0001, 'C': 10}`, but I ended up using LinearSVC as it performed better on project video.
+
 
 ### Sliding Window Search
 
