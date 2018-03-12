@@ -183,5 +183,9 @@ I rendered the resulting labels and heatmap to the output video and they demostr
 
 #### 1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
 
-Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.  
+The pipline runs pretty slow on my laptop (0.5 FPS). Main areas of improvement I see are:
+* try computing HOG for channels in parallel
+* experiment with widows that overlap less and with fewer scales, as combined with the heatmap the result might be comparable
+* I had very few false positives (wich is good), but I took me a while to figure out a way how to get rid of them. I came up with "boosting" solution that allowed to have a higher threshold, but there might be more options to explore.
+* covnets might also work nice for this project
 
