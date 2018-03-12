@@ -8,6 +8,8 @@ The goals/steps of this project are the following:
 * Run the pipeline on a video stream (start with the test_video.mp4 and later implement on full project_video.mp4) and create a heat map of recurring detections frame by frame to reject outliers and follow detected vehicles.
 * Estimate a bounding box for vehicles detected.
 
+While implementing this project I was using course materials, Q&A session video and discussion forums provided by Udacity.
+
 [//]: # (Image References)
 [vehicle]: ./output_images/hod_demo/7_1_car.png
  [nonvehicle]: ./output_images/hod_demo/8_3_noncar.png
@@ -51,7 +53,7 @@ You're reading it!
 
 #### 1. Explain how (and identify where in your code) you extracted HOG features from the training images.
 
-The code for this step is contained in function `get_hog_features` of the file called `image_features.py`. This function is called from `single_image_features` function to build a HOG feature vector from all color channels and stack them together with color spatial binning and histogram. I call `single_image_features` from `extract_features` function, that iterates over the list of training images and returns collection of feature vectors.
+The code for this step is contained in function `get_hog_features` of the file called `image_features.py`. This function is called from `single_image_features` function to build a HOG feature vector from all color channels and stack them together with color spatial binning and histogram. I call `single_image_features` from `extract_features` function, that iterates over the list of training images and returns collection of feature vectors. I used labeled data for [vehicle](https://s3.amazonaws.com/udacity-sdc/Vehicle_Tracking/vehicles.zip) and [non-vehicle](https://s3.amazonaws.com/udacity-sdc/Vehicle_Tracking/non-vehicles.zip) to train my classifier.
 
 I started by reading in all the `vehicle` and `non-vehicle` images.  Here is an example of one of each of the `vehicle` and `non-vehicle` classes:
 
@@ -184,8 +186,8 @@ I rendered the resulting labels and heatmap to the output video and they demonst
 #### 1. Briefly discuss any problems/issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
 
 The pipeline runs pretty slow on my laptop (0.5 FPS). Main areas of improvement I see are:
-* try computing HOG for channels in parallel
-* experiment with windows that overlap less and with fewer scales, as combined with the heatmap the result might be comparable
+* try computing HOG for channels in parallel.
+* experiment with windows that overlap less and with fewer scales, as combined with the heatmap the result might be comparable.
 * I had very few false positives (which is good), but I took me a while to figure out a way how to get rid of them. I came up with "boosting" solution that allowed to have a higher threshold, but there might be more options to explore.
-* covnets might also work nicely for this project
+* Deep neural networks might also work nicely for this project.
 
