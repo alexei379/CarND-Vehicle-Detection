@@ -19,35 +19,23 @@ from sklearn.model_selection import train_test_split
 from heatmap_container import HeatmapContainer
 
 
-# ds = datasets.DefaultDatasetLoader(config.Pipeline.DEBUG)
+color_space = config.Classifier.COLOR_SPACE
+orient = config.Classifier.ORIENT
+pix_per_cell = config.Classifier.PIX_PER_CELL
+cell_per_block = config.Classifier.CELL_PER_BLOCK
+hog_channel = config.Classifier.HOG_CHANNEL
+spatial_size = config.Classifier.SPATIAL_SIZE
+hist_bins = config.Classifier.HIST_BINS
+spatial_f = config.Classifier.SPATIAL_F
+hist_f = config.Classifier.HIST_F
+hog_f = config.Classifier.HOG_F
 
+'''
 # save some test images
+ds = datasets.DefaultDatasetLoader(config.Pipeline.DEBUG)
 
-'''
-heatmap = HeatmapContainer(shape=(10, 20))
-heatmap.add_heatmap([((0,0),(10,20))])
-heatmap.add_heatmap([((0,0),(5,5))])
-heatmap.render_heatmap(clip_threshold=False)
-'''
-
-'''
-trn = trainer.Trainer()
-trn.look_for_classifier_type()
-'''
-
-
-'''
 for i in range(0, 10):
-    color_space = 'RGB'
-    orient = 6
-    pix_per_cell = 8
-    cell_per_block = 2
-    hog_channel = 0
-    spatial_size = (16, 16)
-    hist_bins = 16
-    spatial_f = True
-    hist_f = True
-    hog_f = True
+    img_prefix = config.Pipeline.IMG_OUTPUT_DIR + "hod_demo/" + str(i)
 
     car_image_filename = ds.vehicles[np.random.randint(0, len(ds.vehicles))]
     car_image = visualization.load_image(car_image_filename)
@@ -55,36 +43,41 @@ for i in range(0, 10):
     noncar_image_filename = ds.non_vehicles[np.random.randint(0, len(ds.non_vehicles))]
     noncar_image = visualization.load_image(noncar_image_filename)
 
-    car_features, car_hog_image = image_features.single_image_features(car_image,
-                                                                       color_space,
-                                                                       spatial_size,
-                                                                       hist_bins,
-                                                                       orient,
-                                                                       pix_per_cell,
-                                                                       cell_per_block,
-                                                                       hog_channel,
-                                                                       spatial_f,
-                                                                       hist_f,
-                                                                       hog_f,
-                                                                       True)
-
-    noncar_features, noncar_hog_image = image_features.single_image_features(noncar_image,
-                                                                             color_space,
-                                                                             spatial_size,
-                                                                             hist_bins,
-                                                                             orient,
-                                                                             pix_per_cell,
-                                                                             cell_per_block,
-                                                                             hog_channel,
-                                                                             spatial_f,
-                                                                             hist_f,
-                                                                             hog_f,
-                                                                             True)
-    img_prefix = config.Pipeline.IMG_OUTPUT_DIR + "hod_demo/" + str(i)
     visualization.save_image(car_image, img_prefix + "_1_car.png")
-    visualization.save_image(car_hog_image, img_prefix + "_2_car_hog.png")
     visualization.save_image(noncar_image, img_prefix + "_3_noncar.png")
-    visualization.save_image(noncar_hog_image, img_prefix + "_4_noncar_hog.png")
+
+    for c in [0, 1, 2]:
+        for o in [6, 8, 12]:
+
+            car_features, car_hog_image = image_features.single_image_features(car_image,
+                                                                               color_space,
+                                                                               spatial_size,
+                                                                               hist_bins,
+                                                                               o,
+                                                                               pix_per_cell,
+                                                                               cell_per_block,
+                                                                               c,
+                                                                               spatial_f,
+                                                                               hist_f,
+                                                                               hog_f,
+                                                                               True)
+
+            noncar_features, noncar_hog_image = image_features.single_image_features(noncar_image,
+                                                                                     color_space,
+                                                                                     spatial_size,
+                                                                                     hist_bins,
+                                                                                     o,
+                                                                                     pix_per_cell,
+                                                                                     cell_per_block,
+                                                                                     c,
+                                                                                     spatial_f,
+                                                                                     hist_f,
+                                                                                     hog_f,
+                                                                                     True)
+
+
+            visualization.save_image(car_hog_image, img_prefix + "_2_car_hog" + "_c" + str(c)+ "_o" + str(o) + ".png")
+            visualization.save_image(noncar_hog_image, img_prefix + "_3_noncar_hog" + "_c" + str(c)+ "_o" + str(o) + ".png")
 
 '''
 
@@ -100,7 +93,6 @@ cls = LinearSVC()
 trn = trainer.Trainer()
 trn.extract_training_data()
 trn.train(cls=cls)
-
 '''
 
 X_scaler = classifier.load(config.Classifier.SCALER_FILE)
@@ -148,7 +140,7 @@ def process_heat_image(img, heatmap_history, render_heatmap=True, save_matches=F
 
     for s in scales:
         scale, ystart, ystop, xstart, xstop = s
-        windows_s, confidence_s = classifier.find_cars(img, ystart, ystop, xstart, xstop, scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins, min_confidence=0.1)
+        windows_s, confidence_s = classifier.find_cars(img, ystart, ystop, xstart, xstop, scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins, min_confidence=0.4)
         windows.extend(windows_s)
         confidence.extend(confidence_s)
 
@@ -175,16 +167,21 @@ for img_src in glob.glob(config.Pipeline.IMG_INPUT):
     visualization.save_image(window_img, config.Pipeline.IMG_OUTPUT_DIR + img_src)
 '''
 
+
 from moviepy.editor import VideoFileClip
 
 input_video_file = "project_video.mp4"
 output_video = "output_video/" + input_video_file
 
-heatmap_obj = HeatmapContainer(over_frames=10, threshold=30)
+heatmap_obj = HeatmapContainer(over_frames=12, threshold=200)
 
-clip = VideoFileClip(input_video_file).subclip('00:00:23.50', '00:00:26.00')
+clip = VideoFileClip(input_video_file)#.subclip('00:00:37.50', '00:00:39.00')
     #.subclip('00:00:05.00', '00:00:07.00')
     #.subclip('00:00:18.00', '00:00:20.00')
+    #.subclip('00:00:23.50', '00:00:26.00')
+    #.subclip('00:00:37.50', '00:00:39.00')
+    #.subclip('00:00:44.00', '00:00:47.00')
+    #.subclip('00:00:47.50')
 
 out_clip = clip.fl_image(lambda img: process_heat_image(img, heatmap_obj))
 out_clip.write_videofile(output_video, audio=False)
@@ -227,7 +224,7 @@ for img_src in glob.glob(config.Pipeline.IMG_INPUT):
 
 '''
 
-
+'''
 for img_src in glob.glob(config.Pipeline.IMG_INPUT):
     hog_vis = True
     img = visualization.load_image(img_src)
@@ -262,3 +259,5 @@ for img_src in glob.glob(config.Pipeline.IMG_INPUT):
 
     out_img = visualization.draw_boxes(img, windows, (0, 255, 255), 1)
     visualization.save_image(out_img, config.Pipeline.IMG_OUTPUT_DIR + img_filename + '_all_detected_boxes.jpg')
+
+'''

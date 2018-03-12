@@ -16,13 +16,14 @@ class HeatmapContainer:
         self.thresholded_heatmap = None
         self.labels = []
         self.frame_counter = 0
+        self.prev_detections = []
 
 
     def add_to_heatmap(self, bbox_list_to_add, confidence):
         new_heatmap = np.zeros(shape=self.shape).astype(int)
         for box in bbox_list_to_add:
             # Assuming each "box" takes the form ((x1, y1), (x2, y2))
-            new_heatmap[box[0][1]:box[1][1], box[0][0]:box[1][0]] += 1
+            new_heatmap[box[0][1]:box[1][1], box[0][0]:box[1][0]] += 1 + self.boost(box)
         self.heatmap_queue.append(new_heatmap)
         self.heatmap = sum(self.heatmap_queue)
 
@@ -55,10 +56,29 @@ class HeatmapContainer:
         self.thresholded_heatmap[self.thresholded_heatmap <= self.threshold] = 0
         self.labels = label(self.thresholded_heatmap)
 
+    def boost(self, box):
+        margin = 25
+        boost = 10
+
+        # car entering from the right
+        if 1100 < box[0][0] and 500 > box[0][1]:
+            return boost
+
+        for prev_box in self.prev_detections:
+            if prev_box[0][0] - margin < box[0][0] and \
+                    prev_box[0][1] - margin < box[0][1] and \
+                    prev_box[1][0] + margin > box[1][0] and \
+                    prev_box[1][1] + margin > box[1][1]:
+                # print(prev_box, box)
+                return boost
+
+        return 0
+
 
     def add_bb_list(self, bbox_list, confidence, coeff=1):
         # Iterate through list of bboxes
         for idx, box in enumerate(bbox_list):
+
             # Add += coef for all pixels inside each bbox
             # Assuming each "box" takes the form ((x1, y1), (x2, y2))
             self.heatmap[box[0][1]:box[1][1], box[0][0]:box[1][0]] += coeff
@@ -66,6 +86,7 @@ class HeatmapContainer:
 
     def draw_labeled_bboxes(self, img, color=(0, 0, 255), thickness=2):
         self.frame_counter += 1
+        self.prev_detections = []
         # Iterate through all detected cars
         for car_number in range(1, self.labels[1] + 1):
             # Find pixels with each car_number label value
@@ -76,6 +97,9 @@ class HeatmapContainer:
             # Define a bounding box based on min/max x and y
             bbox = ((np.min(nonzerox), np.min(nonzeroy)), (np.max(nonzerox), np.max(nonzeroy)))
             if abs(bbox[0][0] - bbox[1][0]) * abs(bbox[0][1] - bbox[1][1]) >= 512:
+                # save detections
+                self.prev_detections.append(bbox)
+
                 # Draw the box on the image
                 cv2.rectangle(img, bbox[0], bbox[1], color=color, thickness=thickness)
 
