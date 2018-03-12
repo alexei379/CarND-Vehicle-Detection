@@ -1,6 +1,6 @@
 **Vehicle Detection Project**
 
-The goals / steps of this project are the following:
+The goals/steps of this project are the following:
 
 * Perform a Histogram of Oriented Gradients (HOG) feature extraction on a labeled training set of images and train a classifier Linear SVM classifier
 * Apply a color transform and append binned color features, as well as histograms of color, to the HOG feature vector. 
@@ -62,7 +62,7 @@ I started by reading in all the `vehicle` and `non-vehicle` images.  Here is an 
 
 During lectures I had a chance to explore different `skimage.hog()` parameters (`orientations`, `pixels_per_cell`, and `cells_per_block`) parameters. `pixels_per_cell=8` and `cells_per_block=2` seemed to work well and I wanted to explore more color spaces and number of orientations (see next section).
 
-For demo purposes in this section I grabbed random images from each of the two classes and displayed them to get a feel for what the `skimage.hog()` output looks like.
+For demo purposes in this section, I grabbed random images from each of the two classes and displayed them to get a feel for what the `skimage.hog()` the output looks like.
 
 Here is an example using the `YCrCb` color space channel `Y` and HOG parameters `pixels_per_cell=(8, 8)`, `cells_per_block=(2, 2)` and range of  `orientations=[6, 8, 12]`
 
@@ -74,21 +74,21 @@ Here is an example using the `YCrCb` color space channel `Y` and HOG parameters 
 
 #### 2. Explain how you settled on your final choice of HOG, binned color and histograms of color feature parameters
 
-I tried varous combinations of the parameters with the help of function `look_for_feature_params` in `trainer.py`. All it does it iterates over specified disctionaries with parameter options, trains the model and prints accuracy. I would add values I wanted to compare to appropriate lists and would analize the results. Detailed output results can be foud in `params_analysis.xlsx`
+I tried various combinations of the parameters with the help of function `look_for_feature_params` in `trainer.py`. All it does it iterates over specified dictionaries with parameter options, trains the model and prints accuracy. I would add values I wanted to compare to appropriate lists and would analyze the results. Detailed output results can be found in `params_analysis.xlsx`
 
-I trained the model (see details on training in next section) using variations of parameters on a subset of random 1000 samples and then confirmed the accuracy on the full training set for top choises.
+I trained the model (see details on training in next section) using variations of parameters on a subset of random 1000 samples and then confirmed the accuracy of the full training set for top choices.
 
-First I explored various color spaces for HOG. I fixed HOG `orientations=9`, `pixels_per_cell=8` and `cells_per_block=2`, and was trying to select best color space and chanel. I got the initial results based on random 1000 training samples and performed training on full set for top 3:
+First I explored various color spaces for HOG. I fixed HOG `orientations=9`, `pixels_per_cell=8` and `cells_per_block=2`, and was trying to select best color space and channel. I got the initial results based on random 1000 training samples and performed training on the full set for top 3:
 
 | Color Space| Channel | Accuracy |
 | -  | - | - |
-| YUV	| ALL	| 0.9673 |
-| LUV	| ALL	| 0.9645 |
-| YCrCb	| ALL	| 0.9611 |
+| YUV    | ALL    | 0.9673 |
+| LUV    | ALL    | 0.9645 |
+| YCrCb    | ALL    | 0.9611 |
 
-Next, I performed the same procedure to select best number of HOG orientations from [6, 7, 8, 9, 10] for the color spaces above. I got best results for `LUV` and `YCrCb` colorspaces using `ALL` chanels and `orientations=8`.
+Next, I performed the same procedure to select the best number of HOG orientations from [6, 7, 8, 9, 10] for the color spaces above. I got best results for `LUV` and `YCrCb` colorspaces using `ALL` channels and `orientations=8`.
 
-Using the same method I selected number of `bins=64` for color histogram and size of `spatial=(16, 16)` for spatial binning of color.
+Using the same method I selected the number of `bins=64` for color histogram and size of `spatial=(16, 16)` for spatial binning of color.
 
 I tried various combinations of `[HOG, histogram, spatial]` features and classifier worked best with all 3 present.
 
@@ -111,8 +111,8 @@ HOG_F = True
 
 #### 3. Describe how (and identify where in your code) you trained a classifier using your selected HOG features (and color features if you used them).
 
-I perform the classifier training in `train` function in `trainer.py`. I implemented `extract_training_data` to extract training data using HOG, color histogram and binning features. I scale data using `StandardScaler`. I perform training using `test_size=0.1` split.
-Scaler and trained classifier are pickeled for future use in the pipeline.
+I perform the classifier training in `train` function in `trainer.py`. I implemented `extract_training_data` to extract training data using HOG, color histogram, and binning features. I scale data using `StandardScaler`. I perform training using `test_size=0.1` split.
+Scaler and trained classifier are pickled for future use in the pipeline.
 
 I was exploring LinearSVC vs. SVC tuned with GridSearchCV (`look_for_classifier_type` in `trainer.py`). Best options for SVC were `{'kernel': 'rbf', 'gamma': 0.0001, 'C': 10}`, but I ended up using LinearSVC as it performed better on project video.
 
@@ -121,9 +121,9 @@ I was exploring LinearSVC vs. SVC tuned with GridSearchCV (`look_for_classifier_
 
 #### 1. Describe how (and identify where in your code) you implemented a sliding window search.  How did you decide what scales to search and how much to overlap windows?
 
-I decided that searching different areas of image with different window size might give a good result a be more optimal then searching multiple scales over the whole image, as detections further away would be better matched by the small windows and closer to the camera - by larger windows. I decided to have a big overlap (87.5%) to get more detections.
+I decided that searching different areas of an image with different window size might give a good result a be more optimal then searching multiple scales over the whole image, as detections further away would be better matched by the small windows and closer to the camera - by larger windows. I decided to have a big overlap (87.5%) to get more detections.
 
-I explored various options in `exploration.py` lines 94-126 and came up with the following grids that prooved to be working fine in the video pipeline. `slide_window` in `image_features.py` generates the grid with all possible windows, but I use it just for testing purpose.
+I explored various options in `exploration.py` lines 94-126 and came up with the following grids that proved to be working fine in the video pipeline. `slide_window` in `image_features.py` generates the grid with all possible windows, but I use it just for testing purpose.
 
 Actual classifier implemented in `find_cars` in `classifier.py` (see details below).
 
@@ -137,7 +137,7 @@ Actual classifier implemented in `find_cars` in `classifier.py` (see details bel
 
 #### 2. Show some examples of test images to demonstrate how your pipeline is working.  What did you do to optimize the performance of your classifier?
 
-`find_cars` in `classifier.py` scales the whole image, gets HOG features once per frame and then slides the scaled window to get build feature vector for classifier. It allows to perform HOG feature extration just once for the whole image at each scale instead of doing it for each window, which results in performance increase. It also adds patially binned color (`bin_spatial` in `image_features.py`) and histograms of color (`color_hist` in `image_features.py`) to the feature vector. It calls trained LinearSVC and if the confidence is above `min_confidence=0.5`, the bounding boxes are added to the results. I use `draw_boxes` in `utils.py` to visualize various boxes on images.
+`find_cars` in `classifier.py` scales the whole image, gets HOG features once per frame and then slides the scaled window to get build feature vector for the classifier. It allows performing HOG feature extraction just once for the whole image at each scale instead of doing it for each window, which results in a performance increase. It also adds spatially binned color (`bin_spatial` in `image_features.py`) and histograms of color (`color_hist` in `image_features.py`) to the feature vector. It calls trained LinearSVC and if the confidence is above `min_confidence=0.5`, the bounding boxes are added to the results. I use `draw_boxes` in `utils.py` to visualize various boxes on images.
 
 Here are the samples of scaled HOG detection overlayde over the test images:
 
@@ -166,26 +166,26 @@ https://www.youtube.com/watch?v=cHjV4XDjD1A
 
 #### 2. Describe how (and identify where in your code) you implemented some kind of filter for false positives and some method for combining overlapping bounding boxes.
 
-Video pipeline is implemented in `pipeline.py`. It gets positive detections using `find_cars` in `classifier.py` at various window scales, adds the windows to heatmap, get identified windows back from heatmap and renders result over the frame. I also addded heatmap visualisation in the top right corner of the video.
+Video pipeline is implemented in `pipeline.py`. It gets positive detections using `find_cars` in `classifier.py` at various window scales, adds the windows to heatmap, get identified windows back from heatmap and renders result over the frame. I also added heatmap visualization in the top right corner of the video.
 
-The heatmap is implementted in `heatmap_container.py` file and is used to combine multiple detections across several frames and elliminate false positives using threashold calculated over several frames.
+The heatmap is implemented in `heatmap_container.py` file and is used to combine multiple detections across several frames and eliminate false positives using threshold calculated over several frames.
 
-I recorded the positions of positive detections in each frame of the video in `add_to_heatmap` function. I applied "boost" to the detected boxes if they are within proximity of previously detected blobs or are appearing from the side (not the middle) if detection region. I keep track if last 12 frame's heatmaps using `dequeue` structure. I summed up all heamaps and then thresholded that map to identify vehicle positions. "Boosting" and thresholding the result over several frames to elliminate false positives worked quite well for the project video.
+I recorded the positions of positive detections in each frame of the video in `add_to_heatmap` function. I applied "boost" to the detected boxes if they are within proximity of previously detected blobs or are appearing from the side (not the middle) if detection region. I keep track if last 12 frame's heatmaps using `dequeue` structure. I summed up all heatmaps and then thresholded that map to identify vehicle positions. "Boosting" and thresholding the result over several frames to eliminate false positives worked quite well for the project video.
 
-I then used `scipy.ndimage.measurements.label()` to identify individual blobs in the heatmap. I then assumed each blob corresponded to a vehicle.  I constructed bounding boxes to cover the area of each blob detected and drawed them in `draw_labeled_bboxes`.
+I then used `scipy.ndimage.measurements.label()` to identify individual blobs in the heatmap. I then assumed each blob corresponded to a vehicle.  I constructed bounding boxes to cover the area of each blob detected and drawn them in `draw_labeled_bboxes`.
 
-I rendered the resulting labels and heatmap to the output video and they demostrate both steps well. Example video frame:
+I rendered the resulting labels and heatmap to the output video and they demonstrate both steps well. Example video frame:
 ![heatmap_demo]
 
 ---
 
 ### Discussion
 
-#### 1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
+#### 1. Briefly discuss any problems/issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
 
-The pipline runs pretty slow on my laptop (0.5 FPS). Main areas of improvement I see are:
+The pipeline runs pretty slow on my laptop (0.5 FPS). Main areas of improvement I see are:
 * try computing HOG for channels in parallel
-* experiment with widows that overlap less and with fewer scales, as combined with the heatmap the result might be comparable
-* I had very few false positives (wich is good), but I took me a while to figure out a way how to get rid of them. I came up with "boosting" solution that allowed to have a higher threshold, but there might be more options to explore.
-* covnets might also work nice for this project
+* experiment with windows that overlap less and with fewer scales, as combined with the heatmap the result might be comparable
+* I had very few false positives (which is good), but I took me a while to figure out a way how to get rid of them. I came up with "boosting" solution that allowed to have a higher threshold, but there might be more options to explore.
+* covnets might also work nicely for this project
 
