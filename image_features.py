@@ -1,7 +1,7 @@
 from skimage.feature import hog
 import cv2
 import numpy as np
-import visualization
+import utils
 
 # Define a function to return HOG features and  visualization
 def get_hog_features(img, orient, pix_per_cell, cell_per_block,
@@ -100,7 +100,7 @@ def extract_features(imgs, cspace='RGB', spatial_size=(32, 32), hist_bins=32,
     # Iterate through the list of images
     for file in imgs:
         # Read in each one by one
-        image = visualization.load_image(file)
+        image = utils.load_image(file)
         image_features = single_image_features(image, color_space=cspace, spatial_size=spatial_size, hist_bins=hist_bins,
                                                orient=orient, pix_per_cell=pix_per_cell, cell_per_block=cell_per_block,
                                                hog_channel=hog_channel,
@@ -154,18 +154,4 @@ def slide_window(img, x_start_stop=[None, None], y_start_stop=[None, None],
     # Return the list of windows
     return window_list
 
-def add_heat(heatmap, bbox_list):
-    # Iterate through list of bboxes
-    for box in bbox_list:
-        # Add += 1 for all pixels inside each bbox
-        # Assuming each "box" takes the form ((x1, y1), (x2, y2))
-        heatmap[box[0][1]:box[1][1], box[0][0]:box[1][0]] += 1
 
-    # Return updated heatmap
-    return heatmap
-
-def apply_heat_threshold(heatmap, threshold):
-    # Zero out pixels below the threshold
-    heatmap[heatmap <= threshold] = 0
-    # Return thresholded map
-    return heatmap

@@ -2,12 +2,10 @@ import datasets
 import config
 import numpy as np
 import image_features
-import time
-import classifier
+import utils
 
 from sklearn.svm import LinearSVC
 from sklearn.svm import SVC
-
 
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
@@ -46,9 +44,6 @@ class Trainer:
                                         self.train()
 
 
-
-        # print(i)
-
     def look_for_classifier_type(self):
         self.extract_training_data()
 
@@ -66,6 +61,7 @@ class Trainer:
         # on 1000 samples {'kernel': 'rbf', 'gamma': 0.0001, 'C': 10}
         # trained on full DS = 0.9955
 
+
     def extract_training_data(self, color_space=config.Classifier.COLOR_SPACE,
                               orient=config.Classifier.ORIENT,
                               pix_per_cell=config.Classifier.PIX_PER_CELL,
@@ -77,7 +73,7 @@ class Trainer:
                               hist_f=config.Classifier.HIST_F,
                               hog_f=config.Classifier.HOG_F):
 
-        n_samples = config.Classifier.TRAIN_ON_SUBSET
+        n_samples = config.Trainer.TRAIN_ON_SUBSET
 
         if n_samples > 0:
             random_idxs = np.random.randint(0, len(self.dataset.vehicles), n_samples)
@@ -86,8 +82,6 @@ class Trainer:
         else:
             test_cars = self.dataset.vehicles
             test_noncars = self.dataset.non_vehicles
-
-        t = time.time()
 
         car_features = image_features.extract_features(test_cars,
                                                        color_space,
@@ -113,8 +107,6 @@ class Trainer:
                                                           hist_f,
                                                           hog_f)
 
-        # print(time.time() - t, 'seconds to extract features')
-
         X = np.vstack((car_features, noncar_features)).astype(np.float64)
         self.X_scaler = StandardScaler().fit(X)
         scaled_X = self.X_scaler.transform(X)
@@ -126,16 +118,13 @@ class Trainer:
         self.X_train, self.X_test, self.y_train, self.y_test = \
             train_test_split(scaled_X, y, test_size=0.1, random_state=rand_state)
 
-        # print('Feature vector length', len(self.X_train[0]))
 
     def train(self, cls=LinearSVC()):
         self.classifier = cls
 
-        t = time.time()
         self.classifier.fit(self.X_train, self.y_train)
 
-        # print(time.time() - t, 'Seconds to train')
         print('test accuracy of classifier = ', round(self.classifier.score(self.X_test, self.y_test), 4))
 
-        classifier.save(self.X_scaler, config.Classifier.SCALER_FILE)
-        classifier.save(self.classifier, config.Classifier.CLS_FILE)
+        utils.save_classifier(self.X_scaler, config.Classifier.SCALER_FILE)
+        utils.save_classifier(self.classifier, config.Classifier.CLS_FILE)
