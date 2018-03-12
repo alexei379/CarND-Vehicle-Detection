@@ -136,7 +136,7 @@ Actual classifier implemented in `find_cars` in `classifier.py` (see details bel
 
 #### 2. Show some examples of test images to demonstrate how your pipeline is working.  What did you do to optimize the performance of your classifier?
 
-`find_cars` in `classifier.py` scales the whole image, gets HOG features once per frame and then slides the scaled window to get build feature vector for classifier. It allows to perform HOG feature extration just once for the whole image at each scale instead of doing it for each window, which results in performance increase.
+`find_cars` in `classifier.py` scales the whole image, gets HOG features once per frame and then slides the scaled window to get build feature vector for classifier. It allows to perform HOG feature extration just once for the whole image at each scale instead of doing it for each window, which results in performance increase. It also adds patially binned color (`bin_spatial` in `image_features.py`) and histograms of color (`color_hist` in `image_features.py`) to the feature vector. It calls trained LinearSVC and if the confidence is above `min_confidence=0.5`, the bounding boxes are added to the results. I use `draw_boxes` in `utils.py` to visualize various boxes on images.
 
 Here are the samples of scaled HOG detection overlayde over the test images:
 
