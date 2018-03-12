@@ -1,17 +1,11 @@
-## Writeup Template
-### You can use this file as a template for your writeup if you want to submit it as a markdown file, but feel free to use some other method and submit a pdf if you prefer.
-
----
-
 **Vehicle Detection Project**
 
 The goals / steps of this project are the following:
 
 * Perform a Histogram of Oriented Gradients (HOG) feature extraction on a labeled training set of images and train a classifier Linear SVM classifier
-* Optionally, you can also apply a color transform and append binned color features, as well as histograms of color, to your HOG feature vector. 
-* Note: for those first two steps don't forget to normalize your features and randomize a selection for training and testing.
-* Implement a sliding-window technique and use your trained classifier to search for vehicles in images.
-* Run your pipeline on a video stream (start with the test_video.mp4 and later implement on full project_video.mp4) and create a heat map of recurring detections frame by frame to reject outliers and follow detected vehicles.
+* Apply a color transform and append binned color features, as well as histograms of color, to the HOG feature vector. 
+* Implement a sliding-window technique and use trained classifier to search for vehicles in images.
+* Run the pipeline on a video stream (start with the test_video.mp4 and later implement on full project_video.mp4) and create a heat map of recurring detections frame by frame to reject outliers and follow detected vehicles.
 * Estimate a bounding box for vehicles detected.
 
 [//]: # (Image References)
@@ -38,22 +32,51 @@ You're reading it!
 
 #### 1. Explain how (and identify where in your code) you extracted HOG features from the training images.
 
-The code for this step is contained in the first code cell of the IPython notebook (or in lines # through # of the file called `some_file.py`).  
+The code for this step is contained in lines #TBD through #TBD of the file called `TBD.py`
 
 I started by reading in all the `vehicle` and `non-vehicle` images.  Here is an example of one of each of the `vehicle` and `non-vehicle` classes:
+
+TBD car image
+TBD non-car image
 
 ![alt text][image1]
 
 I then explored different color spaces and different `skimage.hog()` parameters (`orientations`, `pixels_per_cell`, and `cells_per_block`).  I grabbed random images from each of the two classes and displayed them to get a feel for what the `skimage.hog()` output looks like.
 
-Here is an example using the `YCrCb` color space and HOG parameters of `orientations=8`, `pixels_per_cell=(8, 8)` and `cells_per_block=(2, 2)`:
+Here is an example using the `YCrCb` color space and HOG parameters of `orientations=TBD`, `pixels_per_cell=(TBD, TBD)` and `cells_per_block=(TBD, TBD)`:
 
 
 ![alt text][image2]
 
-#### 2. Explain how you settled on your final choice of HOG parameters.
+#### 2. Explain how you settled on your final choice of HOG, binned color features and histograms of color parameters
 
-I tried various combinations of parameters and...
+I tried varous combinations of the parameters using code in lines #TBD through #TBD of the file called `TBD.py`.
+First I trained the model (see details on training in next section) using variations of parameters on a subset of random 1000 samples and then confirmed the accuracy on the full training set for top choises.
+
+First I explored various color spaces for HOG. I fixed HOG parametes as TBD, and was trying to select best color space and chanel. Initial results based on random 1000 training samples:
+
+| Color Space| Channel | Accuracy |
+| -  | - | - |
+| LUV   | ALL	| 0.995 | 
+| YCrCb	| ALL	| 0.96  | 
+| HLS	| ALL	| 0.945 | 
+| YCrCb	| 1	| 0.94  | 
+| YUV	| ALL	| 0.935 | 
+| LUV	| 1	| 0.915 | 
+| ...	| ...	| ... | 
+
+Results on full training set for the top 3:
+
+| Color Space| Channel | Accuracy |
+| -  | - | - |
+| YUV	| ALL	| 0.9673 |
+| LUV	| ALL	| 0.9645 |
+| YCrCb	| ALL	| 0.9611 |
+
+Next, I performed the saame procedure to select best number of HOG orientations from [6, 7, 8, 9, 10] for the color spaces above. I got best results for LUV and YCrCb colorspaces using all chanels and 8 orientations.
+
+
+
 
 #### 3. Describe how (and identify where in your code) you trained a classifier using your selected HOG features (and color features if you used them).
 
