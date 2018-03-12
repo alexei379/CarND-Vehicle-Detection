@@ -9,8 +9,17 @@ The goals / steps of this project are the following:
 * Estimate a bounding box for vehicles detected.
 
 [//]: # (Image References)
-[image1]: ./examples/car_not_car.png
-[image2]: ./examples/HOG_example.jpg
+[vehicle]: ./output_images/hod_demo/7_1_car.png
+ [nonvehicle]: ./output_images/hod_demo/8_3_noncar.png
+
+[car_hog_c0_o6]: ./output_images/hod_demo/7_2_car_hog_c0_o6.png
+[car_hog_c0_o8]: ./output_images/hod_demo/7_2_car_hog_c0_o8.png
+[car_hog_c0_o12]: ./output_images/hod_demo/7_2_car_hog_c0_o12.png
+[noncar_hog_c0_o6]: ./output_images/hod_demo/8_3_noncar_hog_c0_o6.png
+[noncar_hog_c0_o8]: ./output_images/hod_demo/8_3_noncar_hog_c0_o8.png
+[noncar_hog_c0_o12]: ./output_images/hod_demo/8_3_noncar_hog_c0_o12.png
+
+
 [image3]: ./examples/sliding_windows.jpg
 [image4]: ./examples/sliding_window.jpg
 [image5]: ./examples/bboxes_and_heat.png
@@ -36,19 +45,33 @@ The code for this step is contained in lines #TBD through #TBD of the file calle
 
 I started by reading in all the `vehicle` and `non-vehicle` images.  Here is an example of one of each of the `vehicle` and `non-vehicle` classes:
 
-TBD car image
-TBD non-car image
+| vehicle | non-vehicle |
+| - | - |
+| ![vehicle] | ![nonvehicle] |
 
-![alt text][image1]
 
-I then explored different color spaces and different `skimage.hog()` parameters (`orientations`, `pixels_per_cell`, and `cells_per_block`).  I grabbed random images from each of the two classes and displayed them to get a feel for what the `skimage.hog()` output looks like.
+During lectures I had a chance to explore different `skimage.hog()` parameters (`orientations`, `pixels_per_cell`, and `cells_per_block`) parameters. pixels_per_cell=8 and cells_per_block=2 seemed to work well and I wanted to explore more color spaces and number of orientations (see next section).
 
-Here is an example using the `YCrCb` color space and HOG parameters of `orientations=TBD`, `pixels_per_cell=(TBD, TBD)` and `cells_per_block=(TBD, TBD)`:
+I grabbed random images from each of the two classes and displayed them to get a feel for what the `skimage.hog()` output looks like.
+
+Here is an example using the `YCrCb` color space channel `Y` and HOG parameters `pixels_per_cell=(8, 8)`, `cells_per_block=(2, 2)` and range of  `orientations=[6, 8, 12]`
+
+| Type | `orientations=6` | `orientations=8` | `orientations=12` |
+| - | - | - | - |
+| ![vehicle] | ![car_hog_c0_o6] | ![car_hog_c0_o8] | ![car_hog_c0_o12] |
+| ![nonvehicle] | ![noncar_hog_c0_o6] | ![noncar_hog_c0_o8] | ![noncar_hog_c0_o12] |
+
+
+
+
+
 
 
 ![alt text][image2]
 
 #### 2. Explain how you settled on your final choice of HOG, binned color features and histograms of color parameters
+
+During lectures I had a chance to 
 
 I tried varous combinations of the parameters using code in lines #TBD through #TBD of the file called `TBD.py`.
 First I trained the model (see details on training in next section) using variations of parameters on a subset of random 1000 samples and then confirmed the accuracy on the full training set for top choises.
