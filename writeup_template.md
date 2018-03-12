@@ -41,7 +41,7 @@ You're reading it!
 
 #### 1. Explain how (and identify where in your code) you extracted HOG features from the training images.
 
-The code for this step is contained in lines #TBD through #TBD of the file called `TBD.py`
+The code for this step is contained in function `get_hog_features` of the file called `image_features.py`. This function is called from `single_image_features` function to build a HOG feature vector from all color channels and stack them together with color spatial binning and histogram. I call `single_image_features` from `extract_features` function, that iterates over the list of training images and returns collection of feature vectors.
 
 I started by reading in all the `vehicle` and `non-vehicle` images.  Here is an example of one of each of the `vehicle` and `non-vehicle` classes:
 
@@ -50,9 +50,9 @@ I started by reading in all the `vehicle` and `non-vehicle` images.  Here is an 
 | ![vehicle] | ![nonvehicle] |
 
 
-During lectures I had a chance to explore different `skimage.hog()` parameters (`orientations`, `pixels_per_cell`, and `cells_per_block`) parameters. pixels_per_cell=8 and cells_per_block=2 seemed to work well and I wanted to explore more color spaces and number of orientations (see next section).
+During lectures I had a chance to explore different `skimage.hog()` parameters (`orientations`, `pixels_per_cell`, and `cells_per_block`) parameters. `pixels_per_cell=8` and `cells_per_block=2` seemed to work well and I wanted to explore more color spaces and number of orientations (see next section).
 
-I grabbed random images from each of the two classes and displayed them to get a feel for what the `skimage.hog()` output looks like.
+For demo purposes in this section I grabbed random images from each of the two classes and displayed them to get a feel for what the `skimage.hog()` output looks like.
 
 Here is an example using the `YCrCb` color space channel `Y` and HOG parameters `pixels_per_cell=(8, 8)`, `cells_per_block=(2, 2)` and range of  `orientations=[6, 8, 12]`
 
@@ -62,19 +62,11 @@ Here is an example using the `YCrCb` color space channel `Y` and HOG parameters 
 | ![nonvehicle] | ![noncar_hog_c0_o6] | ![noncar_hog_c0_o8] | ![noncar_hog_c0_o12] |
 
 
+#### 2. Explain how you settled on your final choice of HOG, binned color and histograms of color feature parameters
 
+I tried varous combinations of the parameters with the help of function `look_for_feature_params` in `trainer.py`. All it does it iterates over specified disctionaries with parameter options, trains the model and prints accuracy. I would add values I wanted to compare to appropriate lists and would analuze the results in Excel.
 
-
-
-
-![alt text][image2]
-
-#### 2. Explain how you settled on your final choice of HOG, binned color features and histograms of color parameters
-
-During lectures I had a chance to 
-
-I tried varous combinations of the parameters using code in lines #TBD through #TBD of the file called `TBD.py`.
-First I trained the model (see details on training in next section) using variations of parameters on a subset of random 1000 samples and then confirmed the accuracy on the full training set for top choises.
+I trained the model (see details on training in next section) using variations of parameters on a subset of random 1000 samples and then confirmed the accuracy on the full training set for top choises.
 
 First I explored various color spaces for HOG. I fixed HOG parametes as TBD, and was trying to select best color space and chanel. Initial results based on random 1000 training samples:
 
@@ -96,7 +88,7 @@ Results on full training set for the top 3:
 | LUV	| ALL	| 0.9645 |
 | YCrCb	| ALL	| 0.9611 |
 
-Next, I performed the saame procedure to select best number of HOG orientations from [6, 7, 8, 9, 10] for the color spaces above. I got best results for LUV and YCrCb colorspaces using all chanels and 8 orientations.
+Next, I performed the same procedure to select best number of HOG orientations from [6, 7, 8, 9, 10] for the color spaces above. I got best results for LUV and YCrCb colorspaces using all chanels and 8 orientations.
 
 
 
