@@ -54,7 +54,7 @@ def process_heat_image(img, heatmap_history, render_heatmap=True, save_matches=F
     return img
 
 
-input_video_file = "test_video.mp4"
+input_video_file = "project_video.mp4"
 output_video = "output_video/" + input_video_file
 
 heatmap_obj = HeatmapContainer()
