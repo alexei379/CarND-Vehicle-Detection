@@ -19,13 +19,18 @@ The goals / steps of this project are the following:
 [noncar_hog_c0_o8]: ./output_images/hod_demo/8_3_noncar_hog_c0_o8.png
 [noncar_hog_c0_o12]: ./output_images/hod_demo/8_3_noncar_hog_c0_o12.png
 
+[grid_32]: ./output_images/test6.jpg_32_boxes.jpg
+[grid_64]: ./output_images/test6.jpg_64_boxes.jpg
+[grid_80]: ./output_images/test6.jpg_80_boxes.jpg
+[grid_96]: ./output_images/test6.jpg_96_boxes.jpg
+[grid_128]: ./output_images/test6.jpg_128_boxes.jpg
 
-[image3]: ./examples/sliding_windows.jpg
-[image4]: ./examples/sliding_window.jpg
-[image5]: ./examples/bboxes_and_heat.png
-[image6]: ./examples/labels_map.png
-[image7]: ./examples/output_bboxes.png
-[video1]: ./project_video.mp4
+[hog_32]: ./output_images/test6.jpg_32_hog.jpg
+[hog_64]: ./output_images/test6.jpg_64_hog.jpg
+[hog_80]: ./output_images/test6.jpg_80_hog.jpg
+[hog_96]: ./output_images/test6.jpg_96_hog.jpg
+[hog_128]: ./output_images/test6.jpg_128_hog.jpg
+
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/513/view) Points
 ### Here I will consider the rubric points individually and describe how I addressed each point in my implementation.  
@@ -111,9 +116,17 @@ I was exploring LinearSVC vs. SVC tuned with GridSearchCV (`look_for_classifier_
 
 #### 1. Describe how (and identify where in your code) you implemented a sliding window search.  How did you decide what scales to search and how much to overlap windows?
 
-I decided to search random window positions at random scales all over the image and came up with this (ok just kidding I didn't actually ;):
+I decided that searching different areas of image with different window size might give a good result a be more optimal then searching multiple scales over the whole image, as detections further away would be better matched by the small windows and closer to the camera - by larger windows. I decided to have a big overlap (87.5%) to get more detections.
 
-![alt text][image3]
+I explored various options in `exploration.py` lines 94-126 and came up with the following grids that prooved to be working fine in the video pipeline.
+
+| Window | Sample grid with detections |
+| - | - |
+| 32x32 | ![grid_32] |
+| 64x64 | ![grid_64] |
+| 80x80 | ![grid_80] |
+| 96x96 | ![grid_96] |
+| 128x128 | ![grid_128] |
 
 #### 2. Show some examples of test images to demonstrate how your pipeline is working.  What did you do to optimize the performance of your classifier?
 
