@@ -64,23 +64,11 @@ Here is an example using the `YCrCb` color space channel `Y` and HOG parameters 
 
 #### 2. Explain how you settled on your final choice of HOG, binned color and histograms of color feature parameters
 
-I tried varous combinations of the parameters with the help of function `look_for_feature_params` in `trainer.py`. All it does it iterates over specified disctionaries with parameter options, trains the model and prints accuracy. I would add values I wanted to compare to appropriate lists and would analuze the results in Excel.
+I tried varous combinations of the parameters with the help of function `look_for_feature_params` in `trainer.py`. All it does it iterates over specified disctionaries with parameter options, trains the model and prints accuracy. I would add values I wanted to compare to appropriate lists and would analize the results. Detailed output results can be foud in `params_analysis.xlsx`
 
 I trained the model (see details on training in next section) using variations of parameters on a subset of random 1000 samples and then confirmed the accuracy on the full training set for top choises.
 
-First I explored various color spaces for HOG. I fixed HOG parametes as TBD, and was trying to select best color space and chanel. Initial results based on random 1000 training samples:
-
-| Color Space| Channel | Accuracy |
-| -  | - | - |
-| LUV   | ALL	| 0.995 | 
-| YCrCb	| ALL	| 0.96  | 
-| HLS	| ALL	| 0.945 | 
-| YCrCb	| 1	| 0.94  | 
-| YUV	| ALL	| 0.935 | 
-| LUV	| 1	| 0.915 | 
-| ...	| ...	| ... | 
-
-Results on full training set for the top 3:
+First I explored various color spaces for HOG. I fixed HOG `orientations=9`, `pixels_per_cell=8` and `cells_per_block=2`, and was trying to select best color space and chanel. I got the initial results based on random 1000 training samples and performed training on full set for top 3:
 
 | Color Space| Channel | Accuracy |
 | -  | - | - |
@@ -88,9 +76,13 @@ Results on full training set for the top 3:
 | LUV	| ALL	| 0.9645 |
 | YCrCb	| ALL	| 0.9611 |
 
-Next, I performed the same procedure to select best number of HOG orientations from [6, 7, 8, 9, 10] for the color spaces above. I got best results for LUV and YCrCb colorspaces using all chanels and 8 orientations.
+Next, I performed the same procedure to select best number of HOG orientations from [6, 7, 8, 9, 10] for the color spaces above. I got best results for `LUV` and `YCrCb` colorspaces using `ALL` chanels and `orientations=8`.
 
+Using the same method I selected number of `bins=64` for color histogram and size of `spatial=(16, 16)` for spatial binning of color.
 
+I tried various combinations of `[HOG, histogram, spatial]` features and classifier worked best with all 3 present.
+
+I stored the resulting parameters in `config.py` under `Classifier` section.
 
 
 #### 3. Describe how (and identify where in your code) you trained a classifier using your selected HOG features (and color features if you used them).
