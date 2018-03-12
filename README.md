@@ -142,6 +142,7 @@ Scales and areas of interest for the scale I used for the project are defined in
 ```
 
 Here are sample grids and detections:
+
 | Size (Scale) | Sample grid with detections |
 | - | - |
 | 32x32 (0.5) | ![grid_32] |
