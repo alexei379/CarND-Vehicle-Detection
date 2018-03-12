@@ -31,6 +31,10 @@ The goals / steps of this project are the following:
 [hog_96]: ./output_images/test6.jpg_96_hog.jpg
 [hog_128]: ./output_images/test6.jpg_128_hog.jpg
 
+[all_detected_boxes4]: ./output_images/test4.jpg_all_detected_boxes.jpg
+[all_detected_boxes3]: ./output_images/test3.jpg_all_detected_boxes.jpg
+[all_detected_boxes6]: ./output_images/test6.jpg_all_detected_boxes.jpg
+
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/513/view) Points
 ### Here I will consider the rubric points individually and describe how I addressed each point in my implementation.  
@@ -107,7 +111,7 @@ HOG_F = True
 #### 3. Describe how (and identify where in your code) you trained a classifier using your selected HOG features (and color features if you used them).
 
 I perform the classifier training in `train` function in `trainer.py`. I implemented `extract_training_data` to extract training data using HOG, color histogram and binning features. I scale data using `StandardScaler`. I perform training using `test_size=0.1` split.
-Trained classifier is pickeled for future use in pipeline.
+Scaler and trained classifier are pickeled for future use in the pipeline.
 
 I was exploring LinearSVC vs. SVC tuned with GridSearchCV (`look_for_classifier_type` in `trainer.py`). Best options for SVC were `{'kernel': 'rbf', 'gamma': 0.0001, 'C': 10}`, but I ended up using LinearSVC as it performed better on project video.
 
@@ -118,22 +122,39 @@ I was exploring LinearSVC vs. SVC tuned with GridSearchCV (`look_for_classifier_
 
 I decided that searching different areas of image with different window size might give a good result a be more optimal then searching multiple scales over the whole image, as detections further away would be better matched by the small windows and closer to the camera - by larger windows. I decided to have a big overlap (87.5%) to get more detections.
 
-I explored various options in `exploration.py` lines 94-126 and came up with the following grids that prooved to be working fine in the video pipeline.
+I explored various options in `exploration.py` lines 94-126 and came up with the following grids that prooved to be working fine in the video pipeline. `slide_window` in `image_features.py` generates the grid with all possible windows, but I use it just for testing purpose.
 
-| Window | Sample grid with detections |
+Actual classifier implemented in `find_cars` in `classifier.py` (see details below).
+
+| Size (Scale) | Sample grid with detections |
 | - | - |
-| 32x32 | ![grid_32] |
-| 64x64 | ![grid_64] |
-| 80x80 | ![grid_80] |
-| 96x96 | ![grid_96] |
-| 128x128 | ![grid_128] |
+| 32x32 (0.5) | ![grid_32] |
+| 64x64 (1)  | ![grid_64] |
+| 80x80 (1.25)  | ![grid_80] |
+| 96x96 (1.5)  | ![grid_96] |
+| 128x128 (2)  | ![grid_128] |
 
 #### 2. Show some examples of test images to demonstrate how your pipeline is working.  What did you do to optimize the performance of your classifier?
 
-Ultimately I searched on two scales using YCrCb 3-channel HOG features plus spatially binned color and histograms of color in the feature vector, which provided a nice result.  Here are some example images:
+`find_cars` in `classifier.py` scales the whole image, gets HOG features once per frame and then slides the scaled window to get build feature vector for classifier. It allows to perform HOG feature extration just once for the whole image at each scale instead of doing it for each window, which results in performance increase.
 
-![alt text][image4]
----
+Here are the samples of scaled HOG detection overlayde over the test images:
+
+| Size (Scale) | Sample grid HOG overlay |
+| - | - |
+| 32x32 (0.5) | ![hog_32] |
+| 64x64 (1)  | ![hog_64] |
+| 80x80 (1.25)  | ![hog_80] |
+| 96x96 (1.5)  | ![hog_96] |
+| 128x128 (2)  | ![hog_128] |
+
+
+Ultimately I searched on 5 scales using YCrCb 3-channel HOG features plus spatially binned color and histograms of color in the feature vector, which provided a nice result.  Here are some example images:
+
+![all_detected_boxes4]
+![all_detected_boxes3]
+![all_detected_boxes6]
+
 
 ### Video Implementation
 
